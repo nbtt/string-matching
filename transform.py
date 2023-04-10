@@ -3,7 +3,7 @@ import re
 
 def concat_by_columns(columns):
     def inner(data_item: pd.Series):
-        return " ".join(data_item[columns].to_list())
+        return " ".join(map(str, data_item[columns].to_list()))
     return inner
 
 def to_lower():
