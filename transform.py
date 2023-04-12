@@ -11,5 +11,13 @@ def to_lower():
     
 def remove_non_alphanumeric_except_space():
     def inner(data_item: str):
-        return re.sub('[^a-zA-Z0-9\s]+', '', data_item)
+        result = data_item
+
+        # make word seperated by dash into 2 words
+        result = re.sub('([a-zA-Z0-9])-([a-zA-Z0-9])', '\g<1> \g<2>', result)
+
+        # remove non-alphanumeric character except space
+        result = re.sub('[^a-zA-Z0-9\s]+', '', result)
+
+        return result
     return inner
