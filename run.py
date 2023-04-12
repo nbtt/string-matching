@@ -157,11 +157,11 @@ def create_measure_func(string_1: str):
         })
     return inner
 
-result = {
+prediction = {
     'affine_gap': [],
     'smith_waterman': []
 }
-measures_result = {
+measures_prediction = {
     'affine_gap': [],
     'smith_waterman': []
 }
@@ -197,22 +197,23 @@ apply_measure_func = measure.create_apply_measure_func(
     create_select_func,
     filter_func,
     inverted_indexes,
-    result, 
-    measures_result
+    prediction, 
+    measures_prediction
 )
-strings_frame = strings[N_DBLP].to_frame(name='string')
+strings_frame = strings[N_DBLP][:10].to_frame(name='string')
 strings_frame['index'] = strings_frame.index
 strings_frame.apply(apply_measure_func, axis=1)
 
 # Unpack result
-result = { measure_name: reduce(lambda x, y: x + y, result[measure_name]) for measure_name in result }
+prediction = { measure_name: reduce(lambda x, y: x + y, prediction[measure_name]) for measure_name in prediction }
 
 # pprint(measures_result)
-pprint({
-    measure_name: len(result[measure_name]) for measure_name in result
-})
+prediction_count = {
+    measure_name: len(prediction[measure_name]) for measure_name in prediction
+}
+pprint(prediction_count)
 
 # Acuracy
-acurracy, result_compare = metric.compute_accuracy(data, result, N_DBLP_ACM)
-print(result_compare)
+acurracy, prediction_compare = metric.compute_accuracy(data, prediction, N_DBLP_ACM)
+print(prediction_compare)
 print(acurracy)
