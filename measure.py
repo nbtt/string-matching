@@ -1,3 +1,4 @@
+import pandas as pd
 
 def affine_gap(c_0, c_r, c_xy):
     def inner(string_1, string_2):
@@ -47,4 +48,31 @@ def smith_waterman(c_g, c_xy):
 smith_waterman_func = smith_waterman(1, lambda char_1, char2: 2 if char_1 == char2 else -1)
 
 print(smith_waterman_func("Prof. John R. Smith, Univ of Wisconsin", "John R.Smith, Professor"))
-    
+
+def create_apply_measure_func(profile_2_data, threshold, measure_func_creator, result, measures_result):
+    def inner(data_item):
+        profile_1_index = data_item[1]
+        profile_1_string = data_item[0]
+        
+        measure_func = measure_func_creator(profile_1_string)
+        measures = profile_2_data.apply(measure_func)
+        measures_matrix = measures.applymap(lambda measure: measure >= threshold)
+        measures_index = pd.DataFrame()
+        measures_index = {
+            measure_name: measures_matrix.index[measures_matrix[measure_name]] for measure_name in measures_matrix
+        }
+
+        measures_chosen = {
+            measure_name: list(measures_index[measure_name].map(lambda index: [profile_1_index, index])) for measure_name in measures_index
+        }
+
+        for measure_name in measures_chosen:
+            if len(measures_chosen[measure_name]) > 0:
+                result[measure_name].append(measures_chosen[measure_name])
+
+            measures_result[measure_name].append({
+                profile_1_index: measures
+            })
+        
+        return measures
+    return inner
