@@ -3,13 +3,13 @@ import pandas as pd
 def compute_accuracy(data, prediction, ground_truth_name):
     def match_indexes(indexes):
         compare_index = ((ground_truth[profile_names[0]] == indexes[0]) & (ground_truth[profile_names[1]] == indexes[1]))
-        return len(compare_index[compare_index]) > 0
+        return compare_index.any()
     
     profile_names = ground_truth_name.split('_')[:-1]
     ground_truth = data[ground_truth_name]
 
     prediction_compare = {
-        measure_name: len(list(map(match_indexes, prediction[measure_name]))) for measure_name in prediction
+        measure_name: sum(list(map(match_indexes, prediction[measure_name]))) for measure_name in prediction
     }
     
     return {
