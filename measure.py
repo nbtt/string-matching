@@ -21,12 +21,6 @@ def affine_gap(c_0, c_r, c_xy):
     
     return inner
 
-
-affine_gap_func = affine_gap(1, 0.5, lambda char_1, char2: 2 if char_1 == char2 else -1)
-
-print(affine_gap_func("Tuan Trinh", "Tuan nb Trinh"))
-
-
 def smith_waterman(c_g, c_xy):
     def inner(string_1, string_2):
         m, n = len(string_1), len(string_2)
@@ -44,10 +38,6 @@ def smith_waterman(c_g, c_xy):
                 s[i][j] = score
         return s[m][n]/(max_length*equal_char)
     return inner
-
-smith_waterman_func = smith_waterman(1, lambda char_1, char2: 2 if char_1 == char2 else -1)
-
-print(smith_waterman_func("Prof. John R. Smith, Univ of Wisconsin", "John R.Smith, Professor"))
 
 def create_apply_measure_func(strings, strings_sizes, strings_words, profile_2_name, threshold, measure_func_creator, select_func_creator, filter_func, inverted_indexes, result, measures_result):
     # Select function
@@ -103,3 +93,11 @@ def create_apply_measure_func(strings, strings_sizes, strings_words, profile_2_n
         
         return measures
     return inner
+
+if __name__ == "__main__":
+    affine_gap_func = affine_gap(1, 0.5, lambda char_1, char2: 2 if char_1 == char2 else -1)
+    print(affine_gap_func("Tuan Trinh", "Tuan nb Trinh"))
+
+    smith_waterman_func = smith_waterman(1, lambda char_1, char2: 2 if char_1 == char2 else -1)
+    print(smith_waterman_func("Prof. John R. Smith, Univ of Wisconsin", "John R.Smith, Professor"))
+    
