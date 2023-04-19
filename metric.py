@@ -2,7 +2,8 @@ import pandas as pd
 
 def compute_accuracy(data, prediction, ground_truth_name):
     def match_indexes(indexes):
-        return ((ground_truth[profile_names[0]] == indexes[0]) & (ground_truth[profile_names[1]] == indexes[1])).any()
+        compare_index = ((ground_truth[profile_names[0]] == indexes[0]) & (ground_truth[profile_names[1]] == indexes[1]))
+        return len(compare_index[compare_index]) > 0
     
     profile_names = ground_truth_name.split('_')[:-1]
     ground_truth = data[ground_truth_name]
@@ -27,6 +28,6 @@ def compute_precision_recall_f1(prediction_count: dict[str, int], prediction_com
     profile_names = ground_truth_name.split('_')[:-1]
     ground_truth = data[ground_truth_name]
     
-    return = {
+    return {
         item[0]: map(compute_metric, item) for item in prediction_compare.items()
     }
