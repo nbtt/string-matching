@@ -11,8 +11,8 @@ import json
 import sys
 import flow
 
-def scenario_library_title():
-    # Scenario: Library dataset, do string matching with field title, selection by threshold
+def scenario_library(columns, create_transform_func):
+    # Scenario: Library dataset, do string matching with given columns
     # Data names
     N_ACM = 'acm'
     N_DBLP = 'dblp'
@@ -25,17 +25,8 @@ def scenario_library_title():
         N_DBLP_ACM: 'data/dblpAcmIdDuplicates'
     }
 
-    # Transform function
-    def create_transform_func(concat_columns):
-        def inner(data_item: pd.Series):
-            # may add a transform func to split authors and sort a-z and concat again
-            result = transform.concat_by_columns(concat_columns)(data_item)
-            result = transform.to_lower()(result)
-            result = transform.remove_non_alphanumeric_except_space()(result)
-            return result
-        return inner
-    
-    transform_func = create_transform_func(['title'])
+    # Transform function    
+    transform_func = create_transform_func(columns)
 
     # Measure similarity function
     affine_gap_func = measure.affine_gap(1, 0.5, lambda char_1, char2: 2 if char_1 == char2 else -1)
@@ -55,16 +46,38 @@ def scenario_library_title():
         min_overlap
     )
 
-def scenario_library_title_author():
-    pass
+def scenario_library_title():
+    def create_transform_func(concat_columns):
+        def inner(data_item: pd.Series):
+            result = transform.concat_by_columns(concat_columns)(data_item)
+            result = transform.to_lower()(result)
+            result = transform.remove_non_alphanumeric_except_space()(result)
+            return result
+        return inner
+    
+    scenario_library(['title'], create_transform_func)
+
+def scenario_library_title_authors():
+    def create_transform_func(concat_columns):
+        def inner(data_item: pd.Series):
+            data_item_copy = data_item.copy()
+            data_item_copy['authors'] = transform.sort_authors()(data_item_copy['authors'])
+
+            result = transform.concat_by_columns(concat_columns)(data_item_copy)
+            result = transform.to_lower()(result)
+            result = transform.remove_non_alphanumeric_except_space()(result)
+            return result
+        return inner
+    
+    scenario_library(['title', 'authors'], create_transform_func)
 
 def scenario_dcora():
     pass
 
 if __name__ == "__main__":
     scenarios = {
-        "library-title-threshold": scenario_library_title,
-        "library-title-author": scenario_library_title_author,
+        "library-title": scenario_library_title,
+        "library-title-authors": scenario_library_title_authors,
         "dcora": scenario_dcora,
     }
 

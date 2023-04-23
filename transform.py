@@ -21,3 +21,13 @@ def remove_non_alphanumeric_except_space():
 
         return result
     return inner
+
+def sort_authors(sep=','):
+    def inner(authors_string: str):
+        authors = authors_string.split(sep)
+        authors = list(map(lambda author: author.strip(), authors))
+        authors.sort()
+
+        return (sep + ' ').join(authors)
+
+    return inner
