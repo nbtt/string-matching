@@ -66,7 +66,7 @@ def run_flow(
     # Constant
     combined_name = make_combined_name(*profile_names, "")
     P_INVERTED_INDEX = os.path.join(P_EXPORT, combined_name + "_inverted_index.json")
-    P_WORD_FREQS = os.path.join(P_EXPORT, combined_name + "word_frequencies.json")
+    P_WORD_FREQS = os.path.join(P_EXPORT, combined_name + "_word_frequencies.json")
 
     # Transform
     ## Columns of each data profile
