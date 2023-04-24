@@ -22,6 +22,7 @@ def run_flow(
         measure_func, # measure function to calculate simmilarity between 2 strings
         threshold, # threshold of similarity to choose matched pair
         min_overlap, # minimum number of overlapping words in 2 strings in prefix filtering
+        isDirtyER = False, # indicates if given data is for Dirty ER problem instead of Clean-Clean ER problem
     ):
     profile_names = []
     ground_truth_name = None
@@ -36,28 +37,40 @@ def run_flow(
             # Set ground truth name & profile names
             ground_truth_name = name
             profile_names = name.split('_')[:-1]
+            if isDirtyER:
+                profile_names[0] += ".1"
+                profile_names[1] += ".2"
+                ground_truth_name = profile_names[0] + "_" + profile_names[1] + "_gt"
             
             # Load ground truth data
             ground_truths, ground_truths_raw = load_data.parse_ground_truth_to_dataframe(
                 file_path=file_paths[name],
                 names=profile_names
             )
-            data[name] = ground_truths
-            data_raw[name] = ground_truths_raw
+            data[ground_truth_name] = ground_truths
+            data_raw[ground_truth_name] = ground_truths_raw
         else:
             # Load entity data
             profiles, profiles_raw = load_data.parse_entity_to_dataframe(
                 file_path=file_paths[name]
             )
-            data[name] = profiles
-            data_raw[name] = profiles_raw
+            if isDirtyER:
+                data[name + ".1"] = profiles
+                data_raw[name + ".1"] = profiles_raw
+
+                data[name + ".2"] = profiles
+                data_raw[name + ".2"] = profiles_raw
+            else:
+                data[name] = profiles
+                data_raw[name] = profiles_raw
 
     def get_profile_by_ground_truth_id(ground_truth_name, profile_name, ground_truth_id):
         return data[profile_name].loc[data[ground_truth_name].loc[ground_truth_id, profile_name],:]
 
     print("Data:")
     print(profile_names[0], ':\n', data[profile_names[0]], sep='')
-    print(profile_names[1], ':\n', data[profile_names[1]], sep='')
+    if not isDirtyER:
+        print(profile_names[1], ':\n', data[profile_names[1]], sep='')
     print(ground_truth_name, ':\n', data[ground_truth_name], sep='')
     print("\nFirst matched profiles:")
     print(profile_names[0], ':\n', get_profile_by_ground_truth_id(ground_truth_name, profile_names[0], 0), sep='')
@@ -71,7 +84,7 @@ def run_flow(
     # Transform
     ## Columns of each data profile
     print("\nColumns:")
-    for name in file_paths:
+    for name in data.keys():
         print(name, ':\n\t', data[name].columns.to_list(), sep='')
 
     # Selection
@@ -145,7 +158,8 @@ def run_flow(
     # print(word_frequencies)
     print("\nSort word in strings by frequencies:")
     print(profile_names[0], ':\n', strings_words[profile_names[0]], sep='')
-    print(profile_names[1], ':\n', strings_words[profile_names[1]], sep='')
+    if not isDirtyER:
+        print(profile_names[1], ':\n', strings_words[profile_names[1]], sep='')
 
     ## Save word frequencies
     with open(P_WORD_FREQS, "w") as f:
