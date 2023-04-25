@@ -229,14 +229,12 @@ def run_flow(
     pprint(prediction_count)
 
     # Metric
-    acurracy, prediction_compare = metric.compute_accuracy(data, prediction, ground_truth_name)
+    prediction_compare = metric.compare_prediction(data, prediction, ground_truth_name)
 
     metric_result = metric.compute_precision_recall_f1(data, prediction_count, prediction_compare, ground_truth_name)
 
     print("\nPrediction true positive:")
     print(prediction_compare)
-    print("\nAccuracy:")
-    print(acurracy)
     print("\nPrecision, recall & F1 score:")
     for measure_name in metric_result.keys():
         print("\n", measure_name, ":\n", metric_result[measure_name], sep='')
