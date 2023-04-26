@@ -14,7 +14,7 @@ import flow
 pd.set_option('display.max_columns', None)
 pd.set_option('max_colwidth', None)
 
-def scenario_library(columns, create_transform_func):
+def scenario_library(columns, create_transform_func, export_prefix):
     # Scenario: Library dataset, do string matching with given columns
     # Data names
     N_ACM = 'acm'
@@ -46,7 +46,9 @@ def scenario_library(columns, create_transform_func):
             flow.F_SMITH_WATERMAN: smith_waterman_func,
         },
         threshold,
-        min_overlap
+        min_overlap,
+        False,
+        export_prefix
     )
 
 def scenario_library_title():
@@ -58,7 +60,7 @@ def scenario_library_title():
             return result
         return inner
     
-    scenario_library(['title'], create_transform_func)
+    scenario_library(['title'], create_transform_func, "dblp_acm_title")
 
 def scenario_library_title_authors():
     def create_transform_func(concat_columns):
@@ -72,7 +74,7 @@ def scenario_library_title_authors():
             return result
         return inner
     
-    scenario_library(['title', 'authors'], create_transform_func)
+    scenario_library(['title', 'authors'], create_transform_func, "dblp_acm_authors")
 
 def scenario_cora():
     # Scenario: Dcora dataset, do string matching with given columns

@@ -23,6 +23,7 @@ def run_flow(
         threshold, # threshold of similarity to choose matched pair
         min_overlap, # minimum number of overlapping words in 2 strings in prefix filtering
         isDirtyER = False, # indicates if given data is for Dirty ER problem instead of Clean-Clean ER problem
+        export_prefix = "", # export file prefix
     ):
     profile_names = []
     ground_truth_name = None
@@ -67,19 +68,33 @@ def run_flow(
     def get_profile_by_ground_truth_id(ground_truth_name, profile_name, ground_truth_id):
         return data[profile_name].loc[data[ground_truth_name].loc[ground_truth_id, profile_name],:]
 
-    print("Data:")
-    print(profile_names[0], ':\n', data[profile_names[0]], sep='')
-    if not isDirtyER:
-        print(profile_names[1], ':\n', data[profile_names[1]], sep='')
-    print(ground_truth_name, ':\n', data[ground_truth_name], sep='')
-    print("\nFirst matched profiles:")
-    print(profile_names[0], ':\n', get_profile_by_ground_truth_id(ground_truth_name, profile_names[0], 0), sep='')
-    print(profile_names[1], ':\n', get_profile_by_ground_truth_id(ground_truth_name, profile_names[1], 0), sep='')
-
     # Constant
     combined_name = make_combined_name(*profile_names, "")
     P_INVERTED_INDEX = os.path.join(P_EXPORT, combined_name + "_inverted_index.json")
     P_WORD_FREQS = os.path.join(P_EXPORT, combined_name + "_word_frequencies.json")
+    if len(export_prefix) > 0:
+        P_INVERTED_INDEX = os.path.join(P_EXPORT, export_prefix + "_inverted_index.json")
+        P_WORD_FREQS = os.path.join(P_EXPORT, export_prefix + "_word_frequencies.json")
+
+    def make_html_name(name, post_fix):
+        if len(export_prefix) > 0:
+            return os.path.join(P_EXPORT, export_prefix + "_" + name + "_" + post_fix + ".html")
+        return os.path.join(P_EXPORT, combined_name + "_" + name + "_" + post_fix + ".html")
+
+    print("Data:")
+    P_DATA_0 = make_html_name("data", profile_names[0])
+    print(profile_names[0], ':\n', data[profile_names[0]], sep='')
+    data[profile_names[0]].to_html(P_DATA_0)
+    if not isDirtyER:
+        P_DATA_1 = make_html_name("data", profile_names[1])
+        print(profile_names[1], ':\n', data[profile_names[1]], sep='')
+        data[profile_names[1]].to_html(P_DATA_1)
+    print(ground_truth_name, ':\n', data[ground_truth_name], sep='')
+    P_DATA_GT = make_html_name("data", "gt")
+    data[ground_truth_name].to_html(P_DATA_GT)
+    print("\nFirst matched profiles:")
+    print(profile_names[0], ':\n', get_profile_by_ground_truth_id(ground_truth_name, profile_names[0], 0), sep='')
+    print(profile_names[1], ':\n', get_profile_by_ground_truth_id(ground_truth_name, profile_names[1], 0), sep='')
 
     # Transform
     ## Columns of each data profile
@@ -135,6 +150,10 @@ def run_flow(
     print("\nTransformed strings:")
     print(profile_names[0], ':', sep='')
     pprint(strings[profile_names[0]][:10].to_list())
+    P_TRANSFORM_0 = make_html_name("transform", profile_names[0])
+    strings[profile_names[0]].to_frame(profile_names[0]).to_html(P_TRANSFORM_0)
+    P_TRANSFORM_1 = make_html_name("transform", profile_names[1])
+    strings[profile_names[1]].to_frame(profile_names[1]).to_html(P_TRANSFORM_1)
 
     inverted_indexes = create_inverted_indexes(strings, profile_names)
     # print(inverted_indexes)
@@ -158,8 +177,12 @@ def run_flow(
     # print(word_frequencies)
     print("\nSort word in strings by frequencies:")
     print(profile_names[0], ':\n', strings_words[profile_names[0]], sep='')
+    P_SORTED_0 = make_html_name("sorted", profile_names[0])
+    strings_words[profile_names[0]].to_frame(name=profile_names[0]).to_html(P_SORTED_0)
     if not isDirtyER:
         print(profile_names[1], ':\n', strings_words[profile_names[1]], sep='')
+        P_SORTED_1 = make_html_name("sorted", profile_names[1])
+        strings_words[profile_names[1]].to_frame(name=profile_names[1]).to_html(P_SORTED_1)
 
     ## Save word frequencies
     with open(P_WORD_FREQS, "w") as f:
